@@ -23,34 +23,42 @@ struct CategoryHome: View {
     
     var body: some View {
         NavigationView {
-            List {
-                FeaturedLandmarks(landmarks: featured)
-                    .scaledToFill()
-                    .frame(height: 200)
-                    .clipped()
-                    .listRowInsets(EdgeInsets())
-                
-                ForEach(categories.keys.sorted(), id: \.self) { key in
-                    CategoryRow(categoryName: key, items: self.categories[key]!)
+            ScrollView {
+                VStack(alignment: .leading) {
+                    FeaturedLandmarks(landmarks: featured)
+                        .scaledToFill()
+                        .frame(height: 200)
+                        .clipped()
+                    
+                    ForEach(categories.keys.sorted(), id: \.self) { key in
+                        CategoryRow(categoryName: key, items: self.categories[key]!)
+                    }
+                    .frame(height: 185)
                 }
-                .listRowInsets(EdgeInsets())
+                .frame(minWidth: 0, maxWidth: .infinity)
+                .padding(.top)
                 
                 NavigationLink(destination: LandmarkList()) {
                     Text("See All")
+                        .font(.headline)
                 }
+                .padding(.leading)
             }
             .navigationBarTitle(Text("Featured"))
-            .navigationBarItems(trailing:
-                Button(action: {
-                    self.isProfilePresented = true
-                }) {
-                    Image(systemName: "person.crop.circle")
-                        .imageScale(.large)
-                        .accessibility(label: Text("User Profile"))
-                        .padding()
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        self.isProfilePresented = true
+                    }) {
+                        Image(systemName: "person.crop.circle")
+                            .accessibility(label: Text("User Profile"))
+                            .imageScale(.large)
+                            .padding()
+                    }
+                    .sheet(isPresented: $isProfilePresented,
+                            content: { ProfileHost().environmentObject(UserData()) })
                 }
-            ).sheet(isPresented: $isProfilePresented,
-                    content: { ProfileHost().environmentObject(UserData()) })
+            }
         }
     }
 }
@@ -58,7 +66,9 @@ struct CategoryHome: View {
 struct FeaturedLandmarks: View {
     var landmarks: [Landmark]
     var body: some View {
-        landmarks[0].image(forSize: 250).resizable()
+        landmarks[0].image
+            .resizable()
+            .aspectRatio(contentMode: .fill)
     }
 }
 
